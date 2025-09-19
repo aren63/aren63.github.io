@@ -1,0 +1,208 @@
+[
+  {
+    "@timestamp": "2024-01-16T14:23:15.000Z",
+    "src_ip": "185.220.101.42",
+    "dst_ip": "10.0.1.100",
+    "event_type": "failed_login",
+    "message": "Failed authentication attempt from suspicious IP",
+    "signature": "SSH_BRUTE_FORCE",
+    "src_service": "vpn",
+    "dst_service": "ssh",
+    "auth_method": "password",
+    "label": "suspicious",
+    "risk_level": "high",
+    "metadata": {
+      "country": "Russia",
+      "attempts": 5
+    }
+  },
+  {
+    "@timestamp": "2024-01-16T14:22:08.000Z",
+    "src_ip": "103.45.67.89",
+    "dst_ip": "10.0.1.100",
+    "event_type": "failed_login",
+    "message": "Multiple failed login attempts detected",
+    "signature": "REPEATED_LOGIN_FAILURE",
+    "src_service": "vpn",
+    "dst_service": "web",
+    "auth_method": "password",
+    "label": "suspicious",
+    "risk_level": "medium",
+    "metadata": {
+      "country": "China",
+      "attempts": 3
+    }
+  },
+  {
+    "@timestamp": "2024-01-16T14:20:33.000Z",
+    "src_ip": "192.168.1.15",
+    "dst_ip": "10.0.1.200",
+    "event_type": "failed_login",
+    "message": "Failed login attempt from internal network",
+    "signature": "INTERNAL_AUTH_FAILURE",
+    "src_service": "vpn",
+    "dst_service": "rdp",
+    "auth_method": "password",
+    "label": "normal",
+    "risk_level": "low",
+    "metadata": {
+      "country": "Internal",
+      "attempts": 1
+    }
+  },
+  {
+    "@timestamp": "2024-01-16T13:45:12.000Z",
+    "src_ip": "45.76.123.45",
+    "dst_ip": "10.0.1.150",
+    "event_type": "malware",
+    "message": "Malicious file detected in network traffic",
+    "signature": "MALWARE_TROJAN_DETECTED",
+    "src_service": "web",
+    "dst_service": "http",
+    "auth_method": null,
+    "label": "malicious",
+    "risk_level": "high",
+    "metadata": {
+      "country": "Unknown",
+      "file_hash": "a1b2c3d4e5f6",
+      "malware_family": "trojan"
+    }
+  },
+  {
+    "@timestamp": "2024-01-16T12:30:45.000Z",
+    "src_ip": "203.0.113.10",
+    "dst_ip": "10.0.1.75",
+    "event_type": "successful_login",
+    "message": "Successful authentication",
+    "signature": "SUCCESSFUL_AUTH",
+    "src_service": "web",
+    "dst_service": "ssh",
+    "auth_method": "mfa",
+    "label": "normal",
+    "risk_level": "low",
+    "metadata": {
+      "country": "USA",
+      "user": "admin"
+    }
+  },
+  {
+    "@timestamp": "2024-01-15T16:15:22.000Z",
+    "src_ip": "198.51.100.50",
+    "dst_ip": "10.0.1.100",
+    "event_type": "failed_login",
+    "message": "Brute force attack detected",
+    "signature": "BRUTE_FORCE_ATTACK",
+    "src_service": "vpn",
+    "dst_service": "ssh",
+    "auth_method": "password",
+    "label": "suspicious",
+    "risk_level": "high",
+    "metadata": {
+      "country": "Germany",
+      "attempts": 10
+    }
+  },
+  {
+    "@timestamp": "2024-01-15T15:45:11.000Z",
+    "src_ip": "172.16.0.25",
+    "dst_ip": "10.0.1.120",
+    "event_type": "port_scan",
+    "message": "Port scanning activity detected",
+    "signature": "PORT_SCAN_DETECTED",
+    "src_service": "unknown",
+    "dst_service": "multiple",
+    "auth_method": null,
+    "label": "suspicious",
+    "risk_level": "medium",
+    "metadata": {
+      "country": "Internal",
+      "ports_scanned": 25
+    }
+  },
+  {
+    "@timestamp": "2024-01-15T14:30:18.000Z",
+    "src_ip": "91.198.174.192",
+    "dst_ip": "10.0.1.80",
+    "event_type": "malware",
+    "message": "Command and control communication detected",
+    "signature": "C2_COMMUNICATION",
+    "src_service": "web",
+    "dst_service": "http",
+    "auth_method": null,
+    "label": "malicious",
+    "risk_level": "high",
+    "metadata": {
+      "country": "Netherlands",
+      "c2_domain": "malicious.example.com"
+    }
+  },
+  {
+    "@timestamp": "2024-01-15T13:20:45.000Z",
+    "src_ip": "209.85.200.30",
+    "dst_ip": "10.0.1.90",
+    "event_type": "successful_login",
+    "message": "User authenticated successfully",
+    "signature": "NORMAL_AUTH",
+    "src_service": "web",
+    "dst_service": "https",
+    "auth_method": "mfa",
+    "label": "normal",
+    "risk_level": "low",
+    "metadata": {
+      "country": "USA",
+      "user": "john.doe"
+    }
+  },
+  {
+    "@timestamp": "2024-01-15T11:45:33.000Z",
+    "src_ip": "89.248.171.218",
+    "dst_ip": "10.0.1.110",
+    "event_type": "failed_login",
+    "message": "Invalid credentials provided",
+    "signature": "AUTH_FAILURE",
+    "src_service": "vpn",
+    "dst_service": "ldap",
+    "auth_method": "password",
+    "label": "suspicious",
+    "risk_level": "medium",
+    "metadata": {
+      "country": "Romania",
+      "attempts": 2
+    }
+  },
+  {
+    "@timestamp": "2024-01-14T18:30:15.000Z",
+    "src_ip": "185.220.101.42",
+    "dst_ip": "10.0.1.100",
+    "event_type": "failed_login",
+    "message": "Repeated failed authentication from known bad IP",
+    "signature": "KNOWN_BAD_IP",
+    "src_service": "vpn",
+    "dst_service": "ssh",
+    "auth_method": "password",
+    "label": "suspicious",
+    "risk_level": "high",
+    "metadata": {
+      "country": "Russia",
+      "attempts": 8,
+      "threat_intel": "botnet_member"
+    }
+  },
+  {
+    "@timestamp": "2024-01-14T17:15:22.000Z",
+    "src_ip": "157.240.15.35",
+    "dst_ip": "10.0.1.95",
+    "event_type": "data_exfiltration",
+    "message": "Unusual data transfer volume detected",
+    "signature": "DATA_EXFIL_DETECTED",
+    "src_service": "internal",
+    "dst_service": "ftp",
+    "auth_method": null,
+    "label": "suspicious",
+    "risk_level": "high",
+    "metadata": {
+      "country": "USA",
+      "bytes_transferred": 1048576000
+    }
+  }
+]
