@@ -1,0 +1,310 @@
+# SIEM NLP Replit Prototype
+
+A self-contained, **no-Elasticsearch / no-Wazuh required** Replit demo that *simulates* an ELK-based SIEM and demonstrates an NLP middleware layer that: natural-language -> DSL, executes against mock logs, keeps conversational context, and generates textual, tabular, and chart reports.
+
+This single-file prototype (with supporting static files) is designed so judges can **run on Replit immediately**, explore multi-turn investigations, and understand how you'd wire this to real Elastic/Wazuh later.
+
+---
+
+## Project structure (single Replit project)
+
+```
+siem-nlp-proto/
+├─ app.py                # Flask backend + all glue (NLP parser, query gen, context)
+├─ mock_data.json        # sample SIEM logs (JSON array)
+├─ templates/
+│  └─ index.html         # Frontend chat UI + charts
+├─ static/
+│  └─ script.js          # frontend JS: chat, fetch, Chart.js
+└─ README.md             # this file (instructions & demo script)
+```
+
+> On Replit, create a new Python (Flask) repl and paste these files into the editor.
+
+---
+
+## Quick demo goals for judges
+
+1. Show multi-turn context: ask "What suspicious failed logins happened yesterday?" then follow up "Filter only VPN attempts."
+2. Show translation: the system displays the generated Elasticsearch DSL/KQL query string for transparency.
+3. Show report generation: ask "Generate a summary of malware detections in the past month with charts." and the app returns a narrative + table + bar chart.
+4. Explain how this maps to a real SIEM connector: swapping `mock_siem.execute()` with an Elastic client call.
+
+---
+
+## How it works (high-level)
+
+* **NLP Parser**: small rule-based parser that extracts intent (investigate / report), entities (time range, event\_type, filter terms), and simple modifiers.
+* **Query Generator**: maps parsed intent and entities into a readable Elasticsearch DSL string (shown to user) and into an internal filter that works on `mock_data.json`.
+* **SIEM Connector (mock)**: `mock_siem.py` style functions are in `app.py` and filter the mock JSON logs to simulate search and aggregations.
+* **Response Formatter**: converts results into text summary, a data table, and chart payloads (compatible with Chart.js) returned to the frontend.
+* **Context Manager**: stores the last N turns in server-side session; follow-ups are resolved by merging context.
+
+---
+
+## app.py (Full backend code)
+
+```python
+# app.py
+from flask import Flask, request, jsonify, render_template, session
+from datetime import datetime, timedelta
+import json, re
+from collections import defaultdict
+
+app = Flask(__name__)
+app.secret_key = 'replace-with-a-secure-key'
+
+# Load mock logs
+with open('mock_data.json', 'r') as f:
+    MOCK_LOGS = json.load(f)
+
+# ---------- Simple NLP Parser ----------
+# Very small rule-based parser. For demo purposes only. Replace with an LLM / spaCy in prod.
+
+def parse_nl(text, context=None):
+    t = text.lower()
+    parsed = {'intent': None, 'time_range': None, 'filters': {}, 'raw': text}
+
+    # Intent detection (investigate vs report)
+    if any(w in t for w in ['summary', 'report', 'generate a summary', 'chart', 'graphs', 'monthly report']):
+        parsed['intent'] = 'report'
+    else:
+        parsed['intent'] = 'investigate'
+
+    # Time range
+    if 'yesterday' in t:
+        end = datetime.utcnow().date()
+        parsed['time_range'] = {'start': (end - timedelta(days=1)).isoformat(), 'end': end.isoformat()}
+    elif 'last week' in t or 'past week' in t:
+        end = datetime.utcnow().date()
+        start = end - timedelta(days=7)
+        parsed['time_range'] = {'start': start.isoformat(), 'end': end.isoformat()}
+    elif 'past month' in t or 'last month' in t or 'month' in t:
+        end = datetime.utcnow().date()
+        start = end - timedelta(days=30)
+        parsed['time_range'] = {'start': start.isoformat(), 'end': end.isoformat()}
+    else:
+        # try regex for explicit dates YYYY-MM-DD to YYYY-MM-DD
+        m = re.search(r'(\d{4}-\d{2}-\d{2})\s*(to|-)\s*(\d{4}-\d{2}-\d{2})', t)
+        if m:
+            parsed['time_range'] = {'start': m.group(1), 'end': m.group(3)}
+
+    # Event type / keywords
+    if 'failed login' in t or 'failed logins' in t or 'failed login attempts' in t:
+        parsed['filters']['event_type'] = 'failed_login'
+    if 'vpn' in t:
+        parsed['filters']['vpn'] = True
+    if 'mfa' in t or 'multi-factor' in t:
+        parsed['filters']['mfa'] = True
+    if 'malware' in t or 'malicious' in t:
+        parsed['filters']['event_type'] = 'malware'
+    if 'suspicious' in t or 'unusual' in t:
+        parsed['filters']['suspicious'] = True
+
+    # Filter expressions like "filter only vpn" or "exclude 10.0.0.1"
+    ex = re.findall(r'exclude ([0-9\.]+)', t)
+    if ex:
+        parsed['filters']['exclude_ips'] = ex
+    ips = re.findall(r'\b(\d{1,3}(?:\.\d{1,3}){3})\b', t)
+    if ips:
+        parsed['filters']['ips'] = ips
+
+    # If there is previous context, merge
+    if context:
+        parsed['context'] = context
+
+    return parsed
+
+# ---------- Query Generator (to DSL string + internal filter) ----------
+
+def build_dsl_and_filter(parsed):
+    # Build a human-readable DSL (Elasticsearch-like) string for demo
+    clauses = []
+    internal_filter = []
+
+    # Time
+    if parsed.get('time_range'):
+        tr = parsed['time_range']
+        clauses.append(f"range: @timestamp >= {tr['start']} AND @timestamp <= {tr['end']}")
+        internal_filter.append(('time', tr))
+
+    # Event type
+    et = parsed['filters'].get('event_type')
+    if et:
+        clauses.append(f"term: event_type == '{et}'")
+        internal_filter.append(('event_type', et))
+
+    # VPN
+    if parsed['filters'].get('vpn'):
+        clauses.append("match: src_service == 'vpn' OR dst_service == 'vpn'")
+        internal_filter.append(('vpn', True))
+
+    # IPs
+    if parsed['filters'].get('ips'):
+        ips = parsed['filters']['ips']
+        clauses.append('terms: src_ip IN ' + str(ips))
+        internal_filter.append(('ips', ips))
+
+    if parsed['filters'].get('exclude_ips'):
+        ex = parsed['filters']['exclude_ips']
+        clauses.append('must_not: src_ip IN ' + str(ex))
+        internal_filter.append(('exclude_ips', ex))
+
+    if parsed['filters'].get('mfa'):
+        clauses.append("match: auth_method == 'mfa'")
+        internal_filter.append(('mfa', True))
+
+    if parsed['filters'].get('suspicious'):
+        clauses.append("match: label == 'suspicious'")
+        internal_filter.append(('suspicious', True))
+
+    dsl = '{\n  "query": {\n    "bool": {\n      "must": [\n        ' + ',\n        '.join([f'"{c}"' for c in clauses]) + '\n      ]\n    }\n  }\n}'
+
+    return dsl, internal_filter
+
+# ---------- Mock SIEM Connector (simulates search + aggregations) ----------
+
+def apply_filters_to_logs(filters, logs):
+    results = []
+    for log in logs:
+        ok = True
+        for ftype, val in filters:
+            if ftype == 'time':
+                start = datetime.fromisoformat(val['start'])
+                end = datetime.fromisoformat(val['end']) + timedelta(days=1)
+                ts = datetime.fromisoformat(log['@timestamp'])
+                if not (start <= ts < end):
+                    ok = False; break
+            elif ftype == 'event_type':
+                if log.get('event_type') != val:
+                    ok = False; break
+            elif ftype == 'vpn':
+                if not (log.get('src_service') == 'vpn' or log.get('dst_service') == 'vpn'):
+                    ok = False; break
+            elif ftype == 'ips':
+                if log.get('src_ip') not in val and log.get('dst_ip') not in val:
+                    ok = False; break
+            elif ftype == 'exclude_ips':
+                if log.get('src_ip') in val or log.get('dst_ip') in val:
+                    ok = False; break
+            elif ftype == 'mfa':
+                if log.get('auth_method') != 'mfa':
+                    ok = False; break
+            elif ftype == 'suspicious':
+                if log.get('label') != 'suspicious':
+                    ok = False; break
+        if ok:
+            results.append(log)
+    return results
+
+# Aggregations: simple counts per day or per signature
+
+def aggregate_counts(logs, field='signature'):
+    agg = defaultdict(int)
+    for l in logs:
+        agg[l.get(field, 'unknown')] += 1
+    return [{'key': k, 'count': v} for k, v in agg.items()]
+
+# ---------- Formatter ----------
+
+def format_response(parsed, dsl, results):
+    # narrative
+    narrative = ''
+    if parsed['intent'] == 'investigate':
+        narrative = f"Found {len(results)} matching events. Showing top 20."
+    else:
+        narrative = f"Report: {len(results)} events matched for the requested period."
+
+    # table (top 20)
+    table = []
+    for r in results[:20]:
+        table.append({
+            'timestamp': r['@timestamp'],
+            'src_ip': r['src_ip'],
+            'dst_ip': r['dst_ip'],
+            'event': r.get('event_type', ''),
+            'message': r.get('message', '')
+        })
+
+    # chart data: count by signature
+    chart = {'labels': [], 'values': []}
+    agg = aggregate_counts(results, field='signature')
+    agg_sorted = sorted(agg, key=lambda x: -x['count'])[:10]
+    chart['labels'] = [a['key'] for a in agg_sorted]
+    chart['values'] = [a['count'] for a in agg_sorted]
+
+    return {'narrative': narrative, 'dsl': dsl, 'table': table, 'chart': chart}
+
+# ---------- Context management helpers ----------
+
+def push_context(turn):
+    if 'history' not in session:
+        session['history'] = []
+    hist = session['history']
+    hist.append(turn)
+    if len(hist) > 10:
+        hist.pop(0)
+    session['history'] = hist
+
+def get_context():
+    return session.get('history', [])
+
+# ---------- API endpoints ----------
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/api/chat', methods=['POST'])
+def chat_api():
+    data = request.get_json()
+    text = data.get('text', '')
+
+    # get contextual last turn if exists
+    context = get_context()
+    last = context[-1] if context else None
+
+    parsed = parse_nl(text, context=last)
+
+    # If this looks like a follow-up (short text) merge with last parsed filters
+    if last and len(text.split()) < 6:
+        # naive follow-up handling: combine last filters
+        merged_filters = last.get('parsed', {}).get('filters', {}).copy() if last.get('parsed') else {}
+        merged_filters.update(parsed.get('filters', {}))
+        parsed['filters'] = merged_filters
+        # preserve time range from last if none provided
+        if not parsed.get('time_range'):
+            parsed['time_range'] = last.get('parsed', {}).get('time_range')
+
+    dsl, internal_filter = build_dsl_and_filter(parsed)
+    results = apply_filters_to_logs(internal_filter, MOCK_LOGS)
+    resp = format_response(parsed, dsl, results)
+
+    # push to context
+    push_context({'user': text, 'parsed': parsed, 'dsl': dsl, 'result_count': len(results)})
+
+    return jsonify(resp)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=3000, debug=True)
+```
+
+---
+
+## templates/index.html (frontend)
+
+```html
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>SIEM NLP Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 12px }
+    #chat { max-width: 900px; margin: 0 auto }
+    .msg { padding: 8px; border-radius: 6px; margin: 6px 0 }
+    .user { background: #e6f3ff; text-align: right }
+    .bot { background: #f0f0f0 }
+    table { width: 100%; border-collapse: collapse; margi
+```
