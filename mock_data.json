@@ -1,208 +1,782 @@
 [
   {
-    "@timestamp": "2024-01-16T14:23:15.000Z",
-    "src_ip": "185.220.101.42",
-    "dst_ip": "10.0.1.100",
-    "event_type": "failed_login",
-    "message": "Failed authentication attempt from suspicious IP",
-    "signature": "SSH_BRUTE_FORCE",
-    "src_service": "vpn",
-    "dst_service": "ssh",
-    "auth_method": "password",
+    "@timestamp": "2025-09-19T08:15:23Z",
+    "event_type": "login_failed",
+    "username": "alice",
+    "source_ip": "192.168.1.101",
+    "destination_ip": "10.0.0.5",
+    "details": "Invalid password attempt",
     "label": "suspicious",
-    "risk_level": "high",
-    "metadata": {
-      "country": "Russia",
-      "attempts": 5
-    }
+    "signature": "failed_password"
   },
   {
-    "@timestamp": "2024-01-16T14:22:08.000Z",
-    "src_ip": "103.45.67.89",
-    "dst_ip": "10.0.1.100",
-    "event_type": "failed_login",
-    "message": "Multiple failed login attempts detected",
-    "signature": "REPEATED_LOGIN_FAILURE",
-    "src_service": "vpn",
-    "dst_service": "web",
-    "auth_method": "password",
-    "label": "suspicious",
-    "risk_level": "medium",
-    "metadata": {
-      "country": "China",
-      "attempts": 3
-    }
-  },
-  {
-    "@timestamp": "2024-01-16T14:20:33.000Z",
-    "src_ip": "192.168.1.15",
-    "dst_ip": "10.0.1.200",
-    "event_type": "failed_login",
-    "message": "Failed login attempt from internal network",
-    "signature": "INTERNAL_AUTH_FAILURE",
-    "src_service": "vpn",
-    "dst_service": "rdp",
-    "auth_method": "password",
+    "@timestamp": "2025-09-19T09:22:11Z",
+    "event_type": "vpn_access",
+    "username": "bob",
+    "source_ip": "203.0.113.45",
+    "destination_ip": "192.168.10.1",
+    "details": "VPN connection established",
     "label": "normal",
-    "risk_level": "low",
-    "metadata": {
-      "country": "Internal",
-      "attempts": 1
-    }
+    "signature": "vpn_connect"
   },
   {
-    "@timestamp": "2024-01-16T13:45:12.000Z",
-    "src_ip": "45.76.123.45",
-    "dst_ip": "10.0.1.150",
-    "event_type": "malware",
-    "message": "Malicious file detected in network traffic",
-    "signature": "MALWARE_TROJAN_DETECTED",
-    "src_service": "web",
-    "dst_service": "http",
-    "auth_method": null,
-    "label": "malicious",
-    "risk_level": "high",
-    "metadata": {
-      "country": "Unknown",
-      "file_hash": "a1b2c3d4e5f6",
-      "malware_family": "trojan"
-    }
+    "@timestamp": "2025-09-19T10:45:33Z",
+    "event_type": "malware_detected",
+    "username": "charlie",
+    "source_ip": "192.168.1.102",
+    "destination_ip": "10.0.0.8",
+    "details": "Trojan detected in email attachment",
+    "label": "high_risk",
+    "signature": "trojan_xyz"
   },
   {
-    "@timestamp": "2024-01-16T12:30:45.000Z",
-    "src_ip": "203.0.113.10",
-    "dst_ip": "10.0.1.75",
-    "event_type": "successful_login",
-    "message": "Successful authentication",
-    "signature": "SUCCESSFUL_AUTH",
-    "src_service": "web",
-    "dst_service": "ssh",
-    "auth_method": "mfa",
+    "@timestamp": "2025-09-19T11:12:44Z",
+    "event_type": "login_success",
+    "username": "admin",
+    "source_ip": "192.168.1.200",
+    "destination_ip": "10.0.0.1",
+    "details": "Admin login successful",
     "label": "normal",
-    "risk_level": "low",
-    "metadata": {
-      "country": "USA",
-      "user": "admin"
-    }
+    "signature": "admin_login"
   },
   {
-    "@timestamp": "2024-01-15T16:15:22.000Z",
-    "src_ip": "198.51.100.50",
-    "dst_ip": "10.0.1.100",
-    "event_type": "failed_login",
-    "message": "Brute force attack detected",
-    "signature": "BRUTE_FORCE_ATTACK",
-    "src_service": "vpn",
-    "dst_service": "ssh",
-    "auth_method": "password",
+    "@timestamp": "2025-09-19T13:30:15Z",
+    "event_type": "suspicious_activity",
+    "username": "user1",
+    "source_ip": "198.51.100.22",
+    "destination_ip": "192.168.5.10",
+    "details": "Multiple failed authentication attempts",
     "label": "suspicious",
-    "risk_level": "high",
-    "metadata": {
-      "country": "Germany",
-      "attempts": 10
-    }
+    "signature": "auth_bruteforce"
   },
   {
-    "@timestamp": "2024-01-15T15:45:11.000Z",
-    "src_ip": "172.16.0.25",
-    "dst_ip": "10.0.1.120",
-    "event_type": "port_scan",
-    "message": "Port scanning activity detected",
-    "signature": "PORT_SCAN_DETECTED",
-    "src_service": "unknown",
-    "dst_service": "multiple",
-    "auth_method": null,
+    "@timestamp": "2025-09-19T14:55:21Z",
+    "event_type": "vpn_access",
+    "username": "david",
+    "source_ip": "203.0.113.67",
+    "destination_ip": "192.168.10.1",
+    "details": "VPN connection from unusual location",
     "label": "suspicious",
-    "risk_level": "medium",
-    "metadata": {
-      "country": "Internal",
-      "ports_scanned": 25
-    }
+    "signature": "vpn_anomaly"
   },
   {
-    "@timestamp": "2024-01-15T14:30:18.000Z",
-    "src_ip": "91.198.174.192",
-    "dst_ip": "10.0.1.80",
-    "event_type": "malware",
-    "message": "Command and control communication detected",
-    "signature": "C2_COMMUNICATION",
-    "src_service": "web",
-    "dst_service": "http",
-    "auth_method": null,
-    "label": "malicious",
-    "risk_level": "high",
-    "metadata": {
-      "country": "Netherlands",
-      "c2_domain": "malicious.example.com"
-    }
+    "@timestamp": "2025-09-19T16:20:08Z",
+    "event_type": "login_failed",
+    "username": "emma",
+    "source_ip": "192.168.1.105",
+    "destination_ip": "10.0.0.12",
+    "details": "Account locked after multiple failed attempts",
+    "label": "suspicious",
+    "signature": "account_locked"
   },
   {
-    "@timestamp": "2024-01-15T13:20:45.000Z",
-    "src_ip": "209.85.200.30",
-    "dst_ip": "10.0.1.90",
-    "event_type": "successful_login",
-    "message": "User authenticated successfully",
-    "signature": "NORMAL_AUTH",
-    "src_service": "web",
-    "dst_service": "https",
-    "auth_method": "mfa",
+    "@timestamp": "2025-09-18T07:30:45Z",
+    "event_type": "malware_detected",
+    "username": "frank",
+    "source_ip": "192.168.2.15",
+    "destination_ip": "10.0.0.25",
+    "details": "Ransomware activity detected",
+    "label": "high_risk",
+    "signature": "ransomware_abc"
+  },
+  {
+    "@timestamp": "2025-09-18T08:45:12Z",
+    "event_type": "login_success",
+    "username": "grace",
+    "source_ip": "192.168.1.110",
+    "destination_ip": "10.0.0.15",
+    "details": "User login from workstation",
     "label": "normal",
-    "risk_level": "low",
-    "metadata": {
-      "country": "USA",
-      "user": "john.doe"
-    }
+    "signature": "user_login"
   },
   {
-    "@timestamp": "2024-01-15T11:45:33.000Z",
-    "src_ip": "89.248.171.218",
-    "dst_ip": "10.0.1.110",
-    "event_type": "failed_login",
-    "message": "Invalid credentials provided",
-    "signature": "AUTH_FAILURE",
-    "src_service": "vpn",
-    "dst_service": "ldap",
-    "auth_method": "password",
-    "label": "suspicious",
-    "risk_level": "medium",
-    "metadata": {
-      "country": "Romania",
-      "attempts": 2
-    }
+    "@timestamp": "2025-09-18T10:22:33Z",
+    "event_type": "vpn_access",
+    "username": "alice",
+    "source_ip": "203.0.113.89",
+    "destination_ip": "192.168.10.1",
+    "details": "Remote VPN access",
+    "label": "normal",
+    "signature": "vpn_connect"
   },
   {
-    "@timestamp": "2024-01-14T18:30:15.000Z",
-    "src_ip": "185.220.101.42",
-    "dst_ip": "10.0.1.100",
-    "event_type": "failed_login",
-    "message": "Repeated failed authentication from known bad IP",
-    "signature": "KNOWN_BAD_IP",
-    "src_service": "vpn",
-    "dst_service": "ssh",
-    "auth_method": "password",
-    "label": "suspicious",
-    "risk_level": "high",
-    "metadata": {
-      "country": "Russia",
-      "attempts": 8,
-      "threat_intel": "botnet_member"
-    }
+    "@timestamp": "2025-09-18T12:15:44Z",
+    "event_type": "suspicious_activity",
+    "username": "henry",
+    "source_ip": "198.51.100.88",
+    "destination_ip": "192.168.3.20",
+    "details": "Port scanning detected",
+    "label": "high_risk",
+    "signature": "port_scan"
   },
   {
-    "@timestamp": "2024-01-14T17:15:22.000Z",
-    "src_ip": "157.240.15.35",
-    "dst_ip": "10.0.1.95",
-    "event_type": "data_exfiltration",
-    "message": "Unusual data transfer volume detected",
-    "signature": "DATA_EXFIL_DETECTED",
-    "src_service": "internal",
-    "dst_service": "ftp",
-    "auth_method": null,
+    "@timestamp": "2025-09-18T14:30:55Z",
+    "event_type": "login_failed",
+    "username": "user2",
+    "source_ip": "192.168.1.120",
+    "destination_ip": "10.0.0.30",
+    "details": "Password expired",
+    "label": "normal",
+    "signature": "password_expired"
+  },
+  {
+    "@timestamp": "2025-09-18T16:45:11Z",
+    "event_type": "malware_detected",
+    "username": "iris",
+    "source_ip": "192.168.2.25",
+    "destination_ip": "10.0.0.40",
+    "details": "Suspicious file execution blocked",
     "label": "suspicious",
-    "risk_level": "high",
-    "metadata": {
-      "country": "USA",
-      "bytes_transferred": 1048576000
-    }
+    "signature": "malware_blocked"
+  },
+  {
+    "@timestamp": "2025-09-17T09:10:22Z",
+    "event_type": "login_success",
+    "username": "jack",
+    "source_ip": "192.168.1.130",
+    "destination_ip": "10.0.0.45",
+    "details": "Multi-factor authentication successful",
+    "label": "normal",
+    "signature": "mfa_success"
+  },
+  {
+    "@timestamp": "2025-09-17T11:25:33Z",
+    "event_type": "vpn_access",
+    "username": "bob",
+    "source_ip": "203.0.113.123",
+    "destination_ip": "192.168.10.1",
+    "details": "VPN disconnection",
+    "label": "normal",
+    "signature": "vpn_disconnect"
+  },
+  {
+    "@timestamp": "2025-09-17T13:40:44Z",
+    "event_type": "suspicious_activity",
+    "username": "karen",
+    "source_ip": "198.51.100.44",
+    "destination_ip": "192.168.4.15",
+    "details": "Unusual data transfer pattern",
+    "label": "suspicious",
+    "signature": "data_exfiltration"
+  },
+  {
+    "@timestamp": "2025-09-17T15:55:15Z",
+    "event_type": "login_failed",
+    "username": "admin",
+    "source_ip": "203.0.113.200",
+    "destination_ip": "10.0.0.1",
+    "details": "Invalid admin credentials",
+    "label": "high_risk",
+    "signature": "admin_breach_attempt"
+  },
+  {
+    "@timestamp": "2025-09-17T17:20:26Z",
+    "event_type": "malware_detected",
+    "username": "laura",
+    "source_ip": "192.168.2.35",
+    "destination_ip": "10.0.0.55",
+    "details": "Spyware installation attempt",
+    "label": "high_risk",
+    "signature": "spyware_def"
+  },
+  {
+    "@timestamp": "2025-09-16T08:35:37Z",
+    "event_type": "login_success",
+    "username": "mike",
+    "source_ip": "192.168.1.140",
+    "destination_ip": "10.0.0.60",
+    "details": "Regular user login",
+    "label": "normal",
+    "signature": "user_login"
+  },
+  {
+    "@timestamp": "2025-09-16T10:50:48Z",
+    "event_type": "vpn_access",
+    "username": "nancy",
+    "source_ip": "203.0.113.156",
+    "destination_ip": "192.168.10.1",
+    "details": "VPN connection established",
+    "label": "normal",
+    "signature": "vpn_connect"
+  },
+  {
+    "@timestamp": "2025-09-16T12:15:59Z",
+    "event_type": "suspicious_activity",
+    "username": "oscar",
+    "source_ip": "198.51.100.77",
+    "destination_ip": "192.168.5.25",
+    "details": "Privilege escalation attempt",
+    "label": "high_risk",
+    "signature": "privilege_escalation"
+  },
+  {
+    "@timestamp": "2025-09-16T14:30:10Z",
+    "event_type": "login_failed",
+    "username": "penny",
+    "source_ip": "192.168.1.150",
+    "destination_ip": "10.0.0.70",
+    "details": "Account temporarily disabled",
+    "label": "suspicious",
+    "signature": "account_disabled"
+  },
+  {
+    "@timestamp": "2025-09-16T16:45:21Z",
+    "event_type": "malware_detected",
+    "username": "quinn",
+    "source_ip": "192.168.2.45",
+    "destination_ip": "10.0.0.80",
+    "details": "Botnet communication detected",
+    "label": "high_risk",
+    "signature": "botnet_ghi"
+  },
+  {
+    "@timestamp": "2025-09-15T09:00:32Z",
+    "event_type": "login_success",
+    "username": "rachel",
+    "source_ip": "192.168.1.160",
+    "destination_ip": "10.0.0.85",
+    "details": "Successful login after password reset",
+    "label": "normal",
+    "signature": "password_reset_login"
+  },
+  {
+    "@timestamp": "2025-09-15T11:15:43Z",
+    "event_type": "vpn_access",
+    "username": "steve",
+    "source_ip": "203.0.113.234",
+    "destination_ip": "192.168.10.1",
+    "details": "VPN brute force attempt",
+    "label": "high_risk",
+    "signature": "vpn_bruteforce"
+  },
+  {
+    "@timestamp": "2025-09-15T13:30:54Z",
+    "event_type": "suspicious_activity",
+    "username": "tina",
+    "source_ip": "198.51.100.99",
+    "destination_ip": "192.168.6.10",
+    "details": "SQL injection attempt",
+    "label": "high_risk",
+    "signature": "sql_injection"
+  },
+  {
+    "@timestamp": "2025-09-15T15:45:05Z",
+    "event_type": "login_failed",
+    "username": "user3",
+    "source_ip": "192.168.1.170",
+    "destination_ip": "10.0.0.90",
+    "details": "Incorrect username",
+    "label": "normal",
+    "signature": "invalid_user"
+  },
+  {
+    "@timestamp": "2025-09-15T17:00:16Z",
+    "event_type": "malware_detected",
+    "username": "victor",
+    "source_ip": "192.168.2.55",
+    "destination_ip": "10.0.0.95",
+    "details": "Keylogger detected",
+    "label": "high_risk",
+    "signature": "keylogger_jkl"
+  },
+  {
+    "@timestamp": "2025-09-14T08:25:27Z",
+    "event_type": "login_success",
+    "username": "wendy",
+    "source_ip": "192.168.1.180",
+    "destination_ip": "10.0.0.100",
+    "details": "Weekend access approved",
+    "label": "normal",
+    "signature": "weekend_access"
+  },
+  {
+    "@timestamp": "2025-09-14T10:40:38Z",
+    "event_type": "vpn_access",
+    "username": "alice",
+    "source_ip": "203.0.113.111",
+    "destination_ip": "192.168.10.1",
+    "details": "Multiple VPN connections detected",
+    "label": "suspicious",
+    "signature": "multiple_vpn"
+  },
+  {
+    "@timestamp": "2025-09-14T12:55:49Z",
+    "event_type": "suspicious_activity",
+    "username": "xavier",
+    "source_ip": "198.51.100.123",
+    "destination_ip": "192.168.7.5",
+    "details": "Lateral movement detected",
+    "label": "high_risk",
+    "signature": "lateral_movement"
+  },
+  {
+    "@timestamp": "2025-09-14T14:10:00Z",
+    "event_type": "login_failed",
+    "username": "yvonne",
+    "source_ip": "192.168.1.190",
+    "destination_ip": "10.0.0.110",
+    "details": "Biometric authentication failed",
+    "label": "normal",
+    "signature": "biometric_failed"
+  },
+  {
+    "@timestamp": "2025-09-14T16:25:11Z",
+    "event_type": "malware_detected",
+    "username": "zack",
+    "source_ip": "192.168.2.65",
+    "destination_ip": "10.0.0.115",
+    "details": "Cryptocurrency miner detected",
+    "label": "suspicious",
+    "signature": "crypto_miner"
+  },
+  {
+    "@timestamp": "2025-09-13T09:50:22Z",
+    "event_type": "login_success",
+    "username": "anna",
+    "source_ip": "192.168.1.200",
+    "destination_ip": "10.0.0.120",
+    "details": "First login of the day",
+    "label": "normal",
+    "signature": "first_login"
+  },
+  {
+    "@timestamp": "2025-09-13T11:05:33Z",
+    "event_type": "vpn_access",
+    "username": "bruce",
+    "source_ip": "203.0.113.145",
+    "destination_ip": "192.168.10.1",
+    "details": "VPN reconnection after timeout",
+    "label": "normal",
+    "signature": "vpn_reconnect"
+  },
+  {
+    "@timestamp": "2025-09-13T13:20:44Z",
+    "event_type": "suspicious_activity",
+    "username": "clara",
+    "source_ip": "198.51.100.156",
+    "destination_ip": "192.168.8.15",
+    "details": "Abnormal file access pattern",
+    "label": "suspicious",
+    "signature": "file_access_anomaly"
+  },
+  {
+    "@timestamp": "2025-09-13T15:35:55Z",
+    "event_type": "login_failed",
+    "username": "dan",
+    "source_ip": "192.168.1.210",
+    "destination_ip": "10.0.0.130",
+    "details": "Time-based access restriction",
+    "label": "normal",
+    "signature": "time_restriction"
+  },
+  {
+    "@timestamp": "2025-09-13T17:50:06Z",
+    "event_type": "malware_detected",
+    "username": "eve",
+    "source_ip": "192.168.2.75",
+    "destination_ip": "10.0.0.135",
+    "details": "Zero-day exploit attempt",
+    "label": "high_risk",
+    "signature": "zero_day_mno"
+  },
+  {
+    "@timestamp": "2025-09-12T08:15:17Z",
+    "event_type": "login_success",
+    "username": "fred",
+    "source_ip": "192.168.1.220",
+    "destination_ip": "10.0.0.140",
+    "details": "Mobile device login",
+    "label": "normal",
+    "signature": "mobile_login"
+  },
+  {
+    "@timestamp": "2025-09-12T10:30:28Z",
+    "event_type": "vpn_access",
+    "username": "gina",
+    "source_ip": "203.0.113.178",
+    "destination_ip": "192.168.10.1",
+    "details": "VPN access from corporate network",
+    "label": "normal",
+    "signature": "corporate_vpn"
+  },
+  {
+    "@timestamp": "2025-09-12T12:45:39Z",
+    "event_type": "suspicious_activity",
+    "username": "harry",
+    "source_ip": "198.51.100.189",
+    "destination_ip": "192.168.9.20",
+    "details": "DDoS attack source detected",
+    "label": "high_risk",
+    "signature": "ddos_source"
+  },
+  {
+    "@timestamp": "2025-09-12T14:00:50Z",
+    "event_type": "login_failed",
+    "username": "ivy",
+    "source_ip": "192.168.1.230",
+    "destination_ip": "10.0.0.150",
+    "details": "Geolocation mismatch",
+    "label": "suspicious",
+    "signature": "geo_anomaly"
+  },
+  {
+    "@timestamp": "2025-09-12T16:15:01Z",
+    "event_type": "malware_detected",
+    "username": "joe",
+    "source_ip": "192.168.2.85",
+    "destination_ip": "10.0.0.155",
+    "details": "Phishing email attachment",
+    "label": "suspicious",
+    "signature": "phishing_pqr"
+  },
+  {
+    "@timestamp": "2025-09-11T09:40:12Z",
+    "event_type": "login_success",
+    "username": "kate",
+    "source_ip": "192.168.1.240",
+    "destination_ip": "10.0.0.160",
+    "details": "SSO authentication successful",
+    "label": "normal",
+    "signature": "sso_login"
+  },
+  {
+    "@timestamp": "2025-09-11T11:55:23Z",
+    "event_type": "vpn_access",
+    "username": "leo",
+    "source_ip": "203.0.113.201",
+    "destination_ip": "192.168.10.1",
+    "details": "Split tunneling detected",
+    "label": "suspicious",
+    "signature": "split_tunnel"
+  },
+  {
+    "@timestamp": "2025-09-11T13:10:34Z",
+    "event_type": "suspicious_activity",
+    "username": "mia",
+    "source_ip": "198.51.100.212",
+    "destination_ip": "192.168.10.25",
+    "details": "Command injection attempt",
+    "label": "high_risk",
+    "signature": "cmd_injection"
+  },
+  {
+    "@timestamp": "2025-09-11T15:25:45Z",
+    "event_type": "login_failed",
+    "username": "nick",
+    "source_ip": "192.168.1.250",
+    "destination_ip": "10.0.0.170",
+    "details": "Certificate validation failed",
+    "label": "suspicious",
+    "signature": "cert_invalid"
+  },
+  {
+    "@timestamp": "2025-09-11T17:40:56Z",
+    "event_type": "malware_detected",
+    "username": "olivia",
+    "source_ip": "192.168.2.95",
+    "destination_ip": "10.0.0.175",
+    "details": "Rootkit detection",
+    "label": "high_risk",
+    "signature": "rootkit_stu"
+  },
+  {
+    "@timestamp": "2025-09-10T08:05:07Z",
+    "event_type": "login_success",
+    "username": "paul",
+    "source_ip": "192.168.1.15",
+    "destination_ip": "10.0.0.180",
+    "details": "Service account login",
+    "label": "normal",
+    "signature": "service_login"
+  },
+  {
+    "@timestamp": "2025-09-10T10:20:18Z",
+    "event_type": "vpn_access",
+    "username": "quinn",
+    "source_ip": "203.0.113.223",
+    "destination_ip": "192.168.10.1",
+    "details": "VPN bandwidth exceeded",
+    "label": "suspicious",
+    "signature": "bandwidth_exceeded"
+  },
+  {
+    "@timestamp": "2025-09-10T12:35:29Z",
+    "event_type": "suspicious_activity",
+    "username": "ruby",
+    "source_ip": "198.51.100.234",
+    "destination_ip": "192.168.11.30",
+    "details": "Unusual network traffic pattern",
+    "label": "suspicious",
+    "signature": "traffic_anomaly"
+  },
+  {
+    "@timestamp": "2025-09-10T14:50:40Z",
+    "event_type": "login_failed",
+    "username": "sam",
+    "source_ip": "192.168.1.25",
+    "destination_ip": "10.0.0.190",
+    "details": "Two-factor authentication timeout",
+    "label": "normal",
+    "signature": "2fa_timeout"
+  },
+  {
+    "@timestamp": "2025-09-10T16:05:51Z",
+    "event_type": "malware_detected",
+    "username": "tara",
+    "source_ip": "192.168.2.105",
+    "destination_ip": "10.0.0.195",
+    "details": "Adware installation blocked",
+    "label": "suspicious",
+    "signature": "adware_vwx"
+  },
+  {
+    "@timestamp": "2025-09-09T09:30:02Z",
+    "event_type": "login_success",
+    "username": "admin",
+    "source_ip": "192.168.1.35",
+    "destination_ip": "10.0.0.1",
+    "details": "Emergency admin access",
+    "label": "suspicious",
+    "signature": "emergency_admin"
+  },
+  {
+    "@timestamp": "2025-09-09T11:45:13Z",
+    "event_type": "vpn_access",
+    "username": "vera",
+    "source_ip": "203.0.113.245",
+    "destination_ip": "192.168.10.1",
+    "details": "VPN client outdated",
+    "label": "suspicious",
+    "signature": "outdated_client"
+  },
+  {
+    "@timestamp": "2025-09-09T13:00:24Z",
+    "event_type": "suspicious_activity",
+    "username": "will",
+    "source_ip": "198.51.100.11",
+    "destination_ip": "192.168.12.35",
+    "details": "Cross-site scripting attempt",
+    "label": "high_risk",
+    "signature": "xss_attack"
+  },
+  {
+    "@timestamp": "2025-09-09T15:15:35Z",
+    "event_type": "login_failed",
+    "username": "xara",
+    "source_ip": "192.168.1.45",
+    "destination_ip": "10.0.0.200",
+    "details": "Smart card authentication failed",
+    "label": "normal",
+    "signature": "smartcard_failed"
+  },
+  {
+    "@timestamp": "2025-09-09T17:30:46Z",
+    "event_type": "malware_detected",
+    "username": "yuri",
+    "source_ip": "192.168.2.115",
+    "destination_ip": "10.0.0.205",
+    "details": "Browser hijacker detected",
+    "label": "suspicious",
+    "signature": "browser_hijacker"
+  },
+  {
+    "@timestamp": "2025-09-08T08:55:57Z",
+    "event_type": "login_success",
+    "username": "zara",
+    "source_ip": "192.168.1.55",
+    "destination_ip": "10.0.0.210",
+    "details": "Kerberos authentication successful",
+    "label": "normal",
+    "signature": "kerberos_login"
+  },
+  {
+    "@timestamp": "2025-09-08T10:10:08Z",
+    "event_type": "vpn_access",
+    "username": "alice",
+    "source_ip": "203.0.113.12",
+    "destination_ip": "192.168.10.1",
+    "details": "VPN connection from new device",
+    "label": "suspicious",
+    "signature": "new_device_vpn"
+  },
+  {
+    "@timestamp": "2025-09-08T12:25:19Z",
+    "event_type": "suspicious_activity",
+    "username": "bob",
+    "source_ip": "198.51.100.23",
+    "destination_ip": "192.168.13.40",
+    "details": "Buffer overflow attempt",
+    "label": "high_risk",
+    "signature": "buffer_overflow"
+  },
+  {
+    "@timestamp": "2025-09-08T14:40:30Z",
+    "event_type": "login_failed",
+    "username": "charlie",
+    "source_ip": "192.168.1.65",
+    "destination_ip": "10.0.0.220",
+    "details": "LDAP authentication failed",
+    "label": "suspicious",
+    "signature": "ldap_failed"
+  },
+  {
+    "@timestamp": "2025-09-08T16:55:41Z",
+    "event_type": "malware_detected",
+    "username": "david",
+    "source_ip": "192.168.2.125",
+    "destination_ip": "10.0.0.225",
+    "details": "Worm propagation detected",
+    "label": "high_risk",
+    "signature": "worm_yzab"
+  },
+  {
+    "@timestamp": "2025-09-07T09:20:52Z",
+    "event_type": "login_success",
+    "username": "emma",
+    "source_ip": "192.168.1.75",
+    "destination_ip": "10.0.0.230",
+    "details": "Scheduled task execution",
+    "label": "normal",
+    "signature": "scheduled_task"
+  },
+  {
+    "@timestamp": "2025-09-07T11:35:03Z",
+    "event_type": "vpn_access",
+    "username": "frank",
+    "source_ip": "203.0.113.34",
+    "destination_ip": "192.168.10.1",
+    "details": "VPN kill switch activated",
+    "label": "normal",
+    "signature": "vpn_killswitch"
+  },
+  {
+    "@timestamp": "2025-09-07T13:50:14Z",
+    "event_type": "suspicious_activity",
+    "username": "grace",
+    "source_ip": "198.51.100.45",
+    "destination_ip": "192.168.14.45",
+    "details": "DNS tunneling detected",
+    "label": "high_risk",
+    "signature": "dns_tunnel"
+  },
+  {
+    "@timestamp": "2025-09-07T15:05:25Z",
+    "event_type": "login_failed",
+    "username": "henry",
+    "source_ip": "192.168.1.85",
+    "destination_ip": "10.0.0.240",
+    "details": "Token expired",
+    "label": "normal",
+    "signature": "token_expired"
+  },
+  {
+    "@timestamp": "2025-09-07T17:20:36Z",
+    "event_type": "malware_detected",
+    "username": "iris",
+    "source_ip": "192.168.2.135",
+    "destination_ip": "10.0.0.245",
+    "details": "Backdoor installation attempt",
+    "label": "high_risk",
+    "signature": "backdoor_cdef"
+  },
+  {
+    "@timestamp": "2025-09-06T08:45:47Z",
+    "event_type": "login_success",
+    "username": "jack",
+    "source_ip": "192.168.1.95",
+    "destination_ip": "10.0.0.250",
+    "details": "API key authentication",
+    "label": "normal",
+    "signature": "api_auth"
+  },
+  {
+    "@timestamp": "2025-09-06T10:00:58Z",
+    "event_type": "vpn_access",
+    "username": "karen",
+    "source_ip": "203.0.113.56",
+    "destination_ip": "192.168.10.1",
+    "details": "VPN protocol downgrade detected",
+    "label": "suspicious",
+    "signature": "protocol_downgrade"
+  },
+  {
+    "@timestamp": "2025-09-06T12:16:09Z",
+    "event_type": "suspicious_activity",
+    "username": "laura",
+    "source_ip": "198.51.100.67",
+    "destination_ip": "192.168.15.50",
+    "details": "Man-in-the-middle attack detected",
+    "label": "high_risk",
+    "signature": "mitm_attack"
+  },
+  {
+    "@timestamp": "2025-09-06T14:31:20Z",
+    "event_type": "login_failed",
+    "username": "mike",
+    "source_ip": "192.168.1.105",
+    "destination_ip": "10.0.0.255",
+    "details": "Credential stuffing attempt",
+    "label": "high_risk",
+    "signature": "credential_stuffing"
+  },
+  {
+    "@timestamp": "2025-09-06T16:46:31Z",
+    "event_type": "malware_detected",
+    "username": "nancy",
+    "source_ip": "192.168.2.145",
+    "destination_ip": "10.0.1.5",
+    "details": "Logic bomb detected",
+    "label": "high_risk",
+    "signature": "logic_bomb_ghij"
+  },
+  {
+    "@timestamp": "2025-09-05T09:11:42Z",
+    "event_type": "login_success",
+    "username": "oscar",
+    "source_ip": "192.168.1.115",
+    "destination_ip": "10.0.1.10",
+    "details": "Privileged account access",
+    "label": "suspicious",
+    "signature": "privileged_access"
+  },
+  {
+    "@timestamp": "2025-09-05T11:26:53Z",
+    "event_type": "vpn_access",
+    "username": "penny",
+    "source_ip": "203.0.113.78",
+    "destination_ip": "192.168.10.1",
+    "details": "VPN concurrent sessions limit reached",
+    "label": "suspicious",
+    "signature": "session_limit"
+  },
+  {
+    "@timestamp": "2025-09-05T13:42:04Z",
+    "event_type": "suspicious_activity",
+    "username": "quinn",
+    "source_ip": "198.51.100.89",
+    "destination_ip": "192.168.16.55",
+    "details": "Data mining activity detected",
+    "label": "suspicious",
+    "signature": "data_mining"
+  },
+  {
+    "@timestamp": "2025-09-05T15:57:15Z",
+    "event_type": "login_failed",
+    "username": "rachel",
+    "source_ip": "192.168.1.125",
+    "destination_ip": "10.0.1.15",
+    "details": "Hardware token not found",
+    "label": "normal",
+    "signature": "token_missing"
+  },
+  {
+    "@timestamp": "2025-09-05T17:12:26Z",
+    "event_type": "malware_detected",
+    "username": "steve",
+    "source_ip": "192.168.2.155",
+    "destination_ip": "10.0.1.20",
+    "details": "Fileless malware detected",
+    "label": "high_risk",
+    "signature": "fileless_klmn"
   }
 ]

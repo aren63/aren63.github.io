@@ -31,11 +31,68 @@ export class MemStorage implements IStorage {
       const mockDataPath = path.resolve(process.cwd(), 'mock_data.json');
       if (fs.existsSync(mockDataPath)) {
         const data = JSON.parse(fs.readFileSync(mockDataPath, 'utf-8'));
-        this.siemLogs = data.map((log: any) => ({
-          ...log,
-          id: randomUUID(),
-          timestamp: log['@timestamp'], // Map @timestamp to timestamp field
-        }));
+        this.siemLogs = data.map((log: any) => {
+          // Normalize event types
+          let normalizedEventType = log.event_type;
+          switch (log.event_type) {
+            case 'login_failed':
+              normalizedEventType = 'failed_login';
+              break;
+            case 'login_success':
+              normalizedEventType = 'successful_login';
+              break;
+            case 'malware_detected':
+              normalizedEventType = 'malware';
+              break;
+            case 'vpn_access':
+              normalizedEventType = 'vpn_connection';
+              break;
+            case 'suspicious_activity':
+              normalizedEventType = 'suspicious';
+              break;
+          }
+
+          // Derive risk level from label
+          let riskLevel = 'low';
+          if (log.label === 'high_risk') {
+            riskLevel = 'high';
+          } else if (log.label === 'suspicious') {
+            riskLevel = 'medium';
+          }
+
+          // Set VPN service flags
+          let srcService = null;
+          let dstService = null;
+          if (log.event_type === 'vpn_access') {
+            srcService = 'vpn';
+            dstService = 'vpn';
+          }
+
+          // Set auth_method for MFA
+          let authMethod = null;
+          if (log.signature && log.signature.toLowerCase().includes('mfa')) {
+            authMethod = 'mfa';
+          } else if (log.details && (log.details.toLowerCase().includes('multi-factor') || log.details.toLowerCase().includes('mfa'))) {
+            authMethod = 'mfa';
+          }
+
+          return {
+            id: randomUUID(),
+            timestamp: new Date(log['@timestamp']),
+            src_ip: log.source_ip,
+            dst_ip: log.destination_ip,
+            event_type: normalizedEventType,
+            message: log.details,
+            signature: log.signature,
+            src_service: srcService,
+            dst_service: dstService,
+            auth_method: authMethod,
+            username: log.username,
+            label: log.label,
+            risk_level: riskLevel,
+            metadata: null,
+          };
+        });
       }
     } catch (error) {
       console.error('Failed to load mock data:', error);
@@ -84,6 +141,9 @@ export class MemStorage implements IStorage {
         case 'suspicious':
           results = results.filter(log => log.label === 'suspicious');
           break;
+        case 'username':
+          results = results.filter(log => log.username === value);
+          break;
       }
     }
     
@@ -128,7 +188,7 @@ export class MemStorage implements IStorage {
       yesterday.setDate(yesterday.getDate() - 1);
       parsed.time_range = {
         start: yesterday.toISOString().split('T')[0],
-        end: now.toISOString().split('T')[0]
+        end: yesterday.toISOString().split('T')[0]
       };
     } else if (text.includes('last week') || text.includes('past week')) {
       const weekAgo = new Date(now);
@@ -188,7 +248,10 @@ export class MemStorage implements IStorage {
 
     // Time range
     if (parsed.time_range) {
-      clauses.push(`"range": { "@timestamp": { "gte": "${parsed.time_range.start}", "lte": "${parsed.time_range.end}" } }`);
+      const endDate = new Date(parsed.time_range.end);
+      endDate.setDate(endDate.getDate() + 1);
+      const endPlusOne = endDate.toISOString().split('T')[0];
+      clauses.push(`"range": { "@timestamp": { "gte": "${parsed.time_range.start}", "lt": "${endPlusOne}" } }`);
       filters.push(['time', parsed.time_range]);
     }
 
@@ -216,12 +279,12 @@ export class MemStorage implements IStorage {
     }
 
     if (parsed.filters.ips) {
-      clauses.push(`"terms": { "src_ip": ${JSON.stringify(parsed.filters.ips)} }`);
+      clauses.push(`"bool": { "should": [{ "terms": { "src_ip": ${JSON.stringify(parsed.filters.ips)} } }, { "terms": { "dst_ip": ${JSON.stringify(parsed.filters.ips)} } }] }`);
       filters.push(['ips', parsed.filters.ips]);
     }
 
     if (parsed.filters.exclude_ips) {
-      clauses.push(`"bool": { "must_not": [{ "terms": { "src_ip": ${JSON.stringify(parsed.filters.exclude_ips)} } }] }`);
+      clauses.push(`"bool": { "must_not": [{ "terms": { "src_ip": ${JSON.stringify(parsed.filters.exclude_ips)} } }, { "terms": { "dst_ip": ${JSON.stringify(parsed.filters.exclude_ips)} } }] }`);
       filters.push(['exclude_ips', parsed.filters.exclude_ips]);
     }
 
@@ -254,6 +317,20 @@ export class MemStorage implements IStorage {
     const topIps = Object.entries(ipCounts)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 5);
+
+    // User counts
+    const userCounts = filteredLogs.reduce((acc, log) => {
+      if (log.username) {
+        acc[log.username] = (acc[log.username] || 0) + 1;
+      }
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const topUsers = Object.entries(userCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5);
+    
+    const uniqueUsers = new Set(filteredLogs.map(log => log.username).filter(Boolean)).size;
 
     // Timeline data (by hour)
     const timelineCounts = filteredLogs.reduce((acc, log) => {
@@ -288,11 +365,16 @@ export class MemStorage implements IStorage {
         timeline: {
           labels: Object.keys(timelineCounts).sort(),
           values: Object.keys(timelineCounts).sort().map(key => timelineCounts[key] || 0)
+        },
+        users: {
+          labels: topUsers.map(([user]) => user),
+          values: topUsers.map(([, count]) => count)
         }
       },
       stats: {
         total_events: filteredLogs.length,
         unique_ips: uniqueIps,
+        unique_users: uniqueUsers,
         high_risk_events: highRiskEvents,
         time_range: filters.find(([type]) => type === 'time')?.[1] 
           ? `${filters.find(([type]) => type === 'time')[1].start} to ${filters.find(([type]) => type === 'time')[1].end}`

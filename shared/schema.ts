@@ -14,6 +14,7 @@ export const siemLogs = pgTable("siem_logs", {
   src_service: text("src_service"),
   dst_service: text("dst_service"),
   auth_method: text("auth_method"),
+  username: text("username"),
   label: text("label"),
   risk_level: text("risk_level"),
   metadata: jsonb("metadata"),
@@ -60,10 +61,12 @@ export interface QueryResult {
   chart_data: {
     source_ip: { labels: string[]; values: number[] };
     timeline: { labels: string[]; values: number[] };
+    users: { labels: string[]; values: number[] };
   };
   stats: {
     total_events: number;
     unique_ips: number;
+    unique_users: number;
     high_risk_events: number;
     time_range: string;
   };
@@ -77,6 +80,7 @@ export interface ParsedQuery {
   };
   filters: {
     event_type?: string;
+    username?: string;
     vpn?: boolean;
     mfa?: boolean;
     suspicious?: boolean;
