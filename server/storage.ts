@@ -34,6 +34,7 @@ export class MemStorage implements IStorage {
         this.siemLogs = data.map((log: any) => ({
           ...log,
           id: randomUUID(),
+          timestamp: log['@timestamp'], // Map @timestamp to timestamp field
         }));
       }
     } catch (error) {
@@ -256,9 +257,18 @@ export class MemStorage implements IStorage {
 
     // Timeline data (by hour)
     const timelineCounts = filteredLogs.reduce((acc, log) => {
-      const hour = new Date(log.timestamp).toISOString().split('T')[1].split(':')[0];
-      const timeKey = `${hour}:00`;
-      acc[timeKey] = (acc[timeKey] || 0) + 1;
+      try {
+        if (log.timestamp) {
+          const logDate = new Date(log.timestamp);
+          if (!isNaN(logDate.getTime())) {
+            const hour = logDate.toISOString().split('T')[1].split(':')[0];
+            const timeKey = `${hour}:00`;
+            acc[timeKey] = (acc[timeKey] || 0) + 1;
+          }
+        }
+      } catch (error) {
+        console.warn('Invalid timestamp in log:', log.id, log.timestamp);
+      }
       return acc;
     }, {} as Record<string, number>);
 
