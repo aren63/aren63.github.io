@@ -111,7 +111,14 @@ export class MemStorage implements IStorage {
         case 'time':
           const start = new Date(value.start);
           const end = new Date(value.end);
-          end.setDate(end.getDate() + 1); // Include full end day
+          
+          // Check if end date is a full timestamp (contains 'T') or date-only
+          const isFullTimestamp = value.end.includes('T');
+          if (!isFullTimestamp) {
+            // For date-only ranges, include full end day by adding +1 day
+            end.setDate(end.getDate() + 1);
+          }
+          
           results = results.filter(log => {
             const logTime = new Date(log.timestamp);
             return logTime >= start && logTime < end;
@@ -190,36 +197,107 @@ export class MemStorage implements IStorage {
         start: yesterday.toISOString().split('T')[0],
         end: yesterday.toISOString().split('T')[0]
       };
-    } else if (text.includes('last week') || text.includes('past week')) {
-      const weekAgo = new Date(now);
-      weekAgo.setDate(weekAgo.getDate() - 7);
+    } else if (text.includes('today')) {
       parsed.time_range = {
-        start: weekAgo.toISOString().split('T')[0],
+        start: now.toISOString().split('T')[0],
         end: now.toISOString().split('T')[0]
       };
-    } else if (text.includes('past month') || text.includes('last month') || text.includes('month')) {
-      const monthAgo = new Date(now);
-      monthAgo.setDate(monthAgo.getDate() - 30);
+    } else if (text.includes('past week')) {
+      // Rolling 7 days
+      const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
       parsed.time_range = {
-        start: monthAgo.toISOString().split('T')[0],
+        start: weekAgo.toISOString(),
+        end: now.toISOString()
+      };
+    } else if (text.includes('last week')) {
+      // Previous calendar week (Monday to Sunday)
+      const dayOfWeek = now.getDay();
+      const daysToLastMonday = dayOfWeek === 0 ? 13 : dayOfWeek + 6; // Handle Sunday as 0
+      const lastMonday = new Date(now);
+      lastMonday.setDate(lastMonday.getDate() - daysToLastMonday);
+      lastMonday.setHours(0, 0, 0, 0);
+      const lastSunday = new Date(lastMonday);
+      lastSunday.setDate(lastSunday.getDate() + 6);
+      lastSunday.setHours(23, 59, 59, 999);
+      parsed.time_range = {
+        start: lastMonday.toISOString().split('T')[0],
+        end: lastSunday.toISOString().split('T')[0]
+      };
+    } else if (text.includes('this week')) {
+      // Current calendar week (Monday to now)
+      const dayOfWeek = now.getDay();
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Handle Sunday as 0
+      const thisMonday = new Date(now);
+      thisMonday.setDate(thisMonday.getDate() - daysToMonday);
+      thisMonday.setHours(0, 0, 0, 0);
+      parsed.time_range = {
+        start: thisMonday.toISOString().split('T')[0],
         end: now.toISOString().split('T')[0]
+      };
+    } else if (text.includes('past month')) {
+      // Rolling 30 days
+      const monthAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+      parsed.time_range = {
+        start: monthAgo.toISOString(),
+        end: now.toISOString()
+      };
+    } else if (text.includes('last month')) {
+      // Previous calendar month
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+      parsed.time_range = {
+        start: lastMonth.toISOString().split('T')[0],
+        end: endOfLastMonth.toISOString().split('T')[0]
+      };
+    } else if (text.includes('this month')) {
+      // Current calendar month (1st to now)
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      parsed.time_range = {
+        start: startOfMonth.toISOString().split('T')[0],
+        end: now.toISOString().split('T')[0]
+      };
+    } else if (text.includes('last 24 hours') || text.includes('past 24 hours')) {
+      const dayAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+      parsed.time_range = {
+        start: dayAgo.toISOString(),
+        end: now.toISOString()
       };
     }
 
     // Event type and filters
-    if (text.includes('failed login') || text.includes('failed logins')) {
+    if (text.includes('failed login') || text.includes('failed logins') || 
+        text.includes('authentication failure') || text.includes('auth failure') || 
+        text.includes('login failure') || text.includes('failed authentication') ||
+        text.includes('invalid credentials') || text.includes('bad password')) {
       parsed.filters.event_type = 'failed_login';
     }
-    if (text.includes('vpn')) {
+    
+    if (text.includes('successful login') || text.includes('successful logins') || 
+        text.includes('login success') || text.includes('successful authentication') ||
+        text.includes('valid login') || text.includes('authenticated user')) {
+      parsed.filters.event_type = 'successful_login';
+    }
+    
+    if (text.includes('vpn') || text.includes('remote access') || 
+        text.includes('vpn connection') || text.includes('vpn session')) {
       parsed.filters.vpn = true;
     }
-    if (text.includes('mfa') || text.includes('multi-factor')) {
+    
+    if (text.includes('mfa') || text.includes('multi-factor') || 
+        text.includes('two-factor') || text.includes('2fa')) {
       parsed.filters.mfa = true;
     }
-    if (text.includes('malware') || text.includes('malicious')) {
+    
+    if (text.includes('malware') || text.includes('malicious') || 
+        text.includes('virus') || text.includes('trojan') || 
+        text.includes('ransomware') || text.includes('threat') ||
+        text.includes('infection') || text.includes('malware detection') ||
+        text.includes('malware alert')) {
       parsed.filters.event_type = 'malware';
     }
-    if (text.includes('suspicious') || text.includes('unusual')) {
+    
+    if (text.includes('suspicious') || text.includes('unusual') || 
+        text.includes('anomaly') || text.includes('anomalous')) {
       parsed.filters.suspicious = true;
     }
 
@@ -235,6 +313,28 @@ export class MemStorage implements IStorage {
       parsed.filters.exclude_ips = excludeMatch.map(m => m.replace('exclude ', ''));
     }
 
+    // Username parsing - avoid matching IPs and support common username chars
+    let userMatch = text.match(/(?:user(?:name)?\s*[:=]?\s*)([A-Za-z][\w.\-]+)/i);
+    if (!userMatch) {
+      // Also try "for <username>" pattern
+      userMatch = text.match(/\bfor\s+([A-Za-z][\w.\-]+)\b/i);
+    }
+    if (userMatch) {
+      const potentialUser = userMatch[1];
+      // Don't treat as username if it looks like an IP
+      const ipRegex = /^\d{1,3}(\.\d{1,3}){3}$/;
+      if (!ipRegex.test(potentialUser)) {
+        parsed.filters.username = potentialUser;
+      }
+    }
+
+    // Count/quantity queries - change intent to report for statistical queries
+    if (text.includes('how many') || text.includes('count') || 
+        text.includes('number of') || text.includes('total') ||
+        text.includes('statistics') || text.includes('stats')) {
+      parsed.intent = 'report';
+    }
+
     if (context) {
       parsed.context = context;
     }
@@ -248,10 +348,20 @@ export class MemStorage implements IStorage {
 
     // Time range
     if (parsed.time_range) {
-      const endDate = new Date(parsed.time_range.end);
-      endDate.setDate(endDate.getDate() + 1);
-      const endPlusOne = endDate.toISOString().split('T')[0];
-      clauses.push(`"range": { "@timestamp": { "gte": "${parsed.time_range.start}", "lt": "${endPlusOne}" } }`);
+      const isFullTimestamp = parsed.time_range.end.includes('T');
+      let endValue = parsed.time_range.end;
+      
+      if (!isFullTimestamp) {
+        // For date-only ranges, add +1 day and use 'lt'
+        const endDate = new Date(parsed.time_range.end);
+        endDate.setDate(endDate.getDate() + 1);
+        endValue = endDate.toISOString().split('T')[0];
+        clauses.push(`"range": { "@timestamp": { "gte": "${parsed.time_range.start}", "lt": "${endValue}" } }`);
+      } else {
+        // For full timestamps, use 'lt' to align with in-memory filter behavior
+        clauses.push(`"range": { "@timestamp": { "gte": "${parsed.time_range.start}", "lt": "${endValue}" } }`);
+      }
+      
       filters.push(['time', parsed.time_range]);
     }
 
@@ -276,6 +386,11 @@ export class MemStorage implements IStorage {
     if (parsed.filters.suspicious) {
       clauses.push(`"term": { "label": "suspicious" }`);
       filters.push(['suspicious', true]);
+    }
+
+    if (parsed.filters.username) {
+      clauses.push(`"term": { "username": "${parsed.filters.username}" }`);
+      filters.push(['username', parsed.filters.username]);
     }
 
     if (parsed.filters.ips) {
